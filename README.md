@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Interactive Experiences Platform
 
-## Getting Started
+Create beautiful, interactive, shareable digital experiences — digital cards, apology letters, Spotify cassettes, countdowns, and more.
 
-First, run the development server:
+## Features
+
+- **Offerings dashboard** — browse all experience types and start customizing instantly
+- **Anonymous editing** — customize without login; config persists in session storage
+- **Google auth (Supabase)** — required to save drafts and publish
+- **Draft autosave** — authenticated drafts stored in Supabase Postgres
+- **IP-restricted preview** — unpaid published links only work from the creator's IP
+- **₹10 share unlock** — Dodo Payments unlocks public shareable links
+- **Analytics** — view counts for published experiences
+- **Spotify integration** — connect Spotify for cassette experiences
+
+## Tech stack
+
+- Next.js 16 App Router + TypeScript
+- Tailwind CSS 4 + shadcn-style UI
+- Framer Motion
+- Supabase (Auth, Postgres, Storage)
+- Dodo Payments
+
+## Getting started
+
+1. Copy environment variables:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.local.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Create a Supabase project and configure Google OAuth in Authentication → Providers.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run migrations and seed:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Using Supabase CLI
+supabase db push
+psql $DATABASE_URL -f supabase/seed.sql
+```
 
-## Learn More
+4. Install and run:
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm install
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Dodo Payments
 
-## Deploy on Vercel
+Create a ₹10 product in the Dodo dashboard and set `DODO_SHARE_UNLOCK_PRODUCT_ID`. Configure the webhook to POST to `/api/webhooks/dodo`.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If Dodo credentials are not configured, the app runs in **dev unlock mode** and automatically unlocks sharing for local testing.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Project structure
+
+- `app/` — routes (offerings, editor, dashboard, public viewer)
+- `components/experiences/` — experience type plugins (editor + viewer)
+- `lib/templates/registry.ts` — template registry
+- `lib/actions/` — Server Actions
+- `supabase/migrations/` — database schema
+
+## Experience types
+
+Digital cards, Spotify cassettes, apology letters, love letters, birthday pages, memory timelines, countdowns, invitations, gift reveals, and confession pages.
+
+## Notes
+
+- Mobile IP addresses may change; unpaid IP-restricted links can break on cellular networks.
+- Public sharing requires Google login + ₹10 payment per experience.
