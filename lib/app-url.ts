@@ -1,10 +1,17 @@
+export const SPOTIFY_CALLBACK_PATH = "/api/spotify/callback";
+
 function isLocalHost(host: string): boolean {
   return host.startsWith("localhost") || host.startsWith("127.0.0.1");
 }
 
+export function normalizeAppUrl(url: string): string {
+  return url.trim().replace(/\/+$/, "");
+}
+
+/** Canonical app origin. Prefers NEXT_PUBLIC_APP_URL when set. */
 export function getAppUrl(request?: Request): string {
-  const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
-  if (fromEnv) return fromEnv;
+  const fromEnv = process.env.NEXT_PUBLIC_APP_URL;
+  if (fromEnv) return normalizeAppUrl(fromEnv);
 
   if (request) {
     const url = new URL(request.url);
@@ -22,4 +29,15 @@ export function getAppUrl(request?: Request): string {
   }
 
   return "http://localhost:3002";
+}
+
+/** Absolute path on the app origin, e.g. appPath("/profile", request). */
+export function appPath(path: string, request?: Request): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return new URL(normalizedPath, `${getAppUrl(request)}/`).href;
+}
+
+/** Must match Spotify Developer Dashboard redirect URI exactly. */
+export function getSpotifyRedirectUri(request?: Request): string {
+  return new URL(SPOTIFY_CALLBACK_PATH, `${getAppUrl(request)}/`).href;
 }

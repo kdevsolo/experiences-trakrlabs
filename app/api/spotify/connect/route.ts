@@ -1,32 +1,31 @@
 import { NextResponse } from "next/server";
-import { getAppUrl } from "@/lib/app-url";
+import { appPath, getSpotifyRedirectUri } from "@/lib/app-url";
 import { createClient } from "@/lib/supabase/server";
 
-const profileUrl = (appUrl: string, params: Record<string, string>) => {
-  const url = new URL("/profile", appUrl);
+const profileUrl = (request: Request, params: Record<string, string>) => {
+  const url = new URL(appPath("/profile", request));
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   return url.toString();
 };
 
 export async function GET(request: Request) {
-  const appUrl = getAppUrl(request);
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(`${appUrl}/?login=required&next=/profile`);
+    return NextResponse.redirect(appPath("/?login=required&next=/profile", request));
   }
 
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   if (!clientId) {
-    return NextResponse.redirect(profileUrl(appUrl, { spotify: "missing_config" }));
+    return NextResponse.redirect(profileUrl(request, { spotify: "missing_config" }));
   }
 
   const { searchParams } = new URL(request.url);
   const returnTo = searchParams.get("returnTo") ?? "/profile";
-  const redirectUri = `${appUrl}/api/spotify/callback`;
+  const redirectUri = getSpotifyRedirectUri(request);
   const scope = ["playlist-read-private", "playlist-read-collaborative"].join(" ");
 
   const authUrl = new URL("https://accounts.spotify.com/authorize");

@@ -115,7 +115,7 @@ function getSpotifyStatusMessage(status?: string, reason?: string) {
   if (status === "error") {
     const messages: Record<string, string> = {
       redirect_mismatch:
-        "Redirect URI mismatch. In Spotify Developer Dashboard, add http://localhost:3002/api/spotify/callback as a Redirect URI.",
+        "Redirect URI mismatch. In Spotify Developer Dashboard, add https://experiences.trakrlabs.com/api/spotify/callback (or your NEXT_PUBLIC_APP_URL + /api/spotify/callback).",
       save_failed: "Spotify authorized but saving the connection failed. Check that music_connections exists in Supabase.",
       token_exchange: "Could not exchange Spotify authorization code. Try connecting again.",
       missing_code: "Spotify did not return an authorization code.",
