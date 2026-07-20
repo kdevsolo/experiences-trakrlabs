@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
+import { getAppUrl } from "@/lib/app-url";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 
-const profileUrl = (params: Record<string, string>) => {
-  const url = new URL("/profile", process.env.NEXT_PUBLIC_APP_URL!);
+const profileUrl = (appUrl: string, params: Record<string, string>) => {
+  const url = new URL("/profile", appUrl);
   Object.entries(params).forEach(([key, value]) => url.searchParams.set(key, value));
   return url.toString();
 };
 
 export async function GET(request: Request) {
+  const appUrl = getAppUrl(request);
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
   const state = searchParams.get("state");
@@ -15,20 +17,20 @@ export async function GET(request: Request) {
 
   if (spotifyError) {
     console.error("[spotify/callback] Spotify returned error:", spotifyError);
-    return NextResponse.redirect(profileUrl({ spotify: "denied" }));
+    return NextResponse.redirect(profileUrl(appUrl, { spotify: "denied" }));
   }
 
   if (!code) {
-    return NextResponse.redirect(profileUrl({ spotify: "error", reason: "missing_code" }));
+    return NextResponse.redirect(profileUrl(appUrl, { spotify: "error", reason: "missing_code" }));
   }
 
   const clientId = process.env.SPOTIFY_CLIENT_ID;
   const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
-    return NextResponse.redirect(profileUrl({ spotify: "missing_config" }));
+    return NextResponse.redirect(profileUrl(appUrl, { spotify: "missing_config" }));
   }
 
-  const redirectUri = `${process.env.NEXT_PUBLIC_APP_URL}/api/spotify/callback`;
+  const redirectUri = `${appUrl}/api/spotify/callback`;
   const tokenResponse = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -56,7 +58,7 @@ export async function GET(request: Request) {
       tokenData.error === "invalid_grant"
         ? "redirect_mismatch"
         : tokenData.error ?? "token_exchange";
-    return NextResponse.redirect(profileUrl({ spotify: "error", reason }));
+    return NextResponse.redirect(profileUrl(appUrl, { spotify: "error", reason }));
   }
 
   const supabase = await createClient();
@@ -65,7 +67,7 @@ export async function GET(request: Request) {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/?login=required&next=/profile`);
+    return NextResponse.redirect(`${appUrl}/?login=required&next=/profile`);
   }
 
   const expiresAt = tokenData.expires_in
@@ -90,11 +92,11 @@ export async function GET(request: Request) {
 
   if (insertError) {
     console.error("[spotify/callback] Failed to save connection:", insertError);
-    return NextResponse.redirect(profileUrl({ spotify: "error", reason: "save_failed" }));
+    return NextResponse.redirect(profileUrl(appUrl, { spotify: "error", reason: "save_failed" }));
   }
 
   const returnTo = state && state.startsWith("/") ? state : "/profile";
-  const successUrl = new URL(returnTo, process.env.NEXT_PUBLIC_APP_URL!);
+  const successUrl = new URL(returnTo, appUrl);
   successUrl.searchParams.set("spotify", "connected");
   return NextResponse.redirect(successUrl.toString());
 }
