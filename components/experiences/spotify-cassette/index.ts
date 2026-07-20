@@ -25,6 +25,7 @@ export const spotifyCassettePlugin: ExperiencePlugin = {
     subtitle: z.string(),
     playlistId: z.string().optional(),
     playlistName: z.string().optional(),
+    playlistImageUrl: z.string().optional(),
     coverColor: z.string(),
     customCoverUrl: z.string().optional(),
   }),

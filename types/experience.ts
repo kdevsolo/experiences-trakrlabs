@@ -17,6 +17,7 @@ export interface EditorProps<TConfig> {
   config: TConfig;
   onChange: (config: TConfig) => void;
   isAuthenticated: boolean;
+  returnPath?: string;
 }
 
 export interface ViewerProps<TConfig> {
@@ -72,6 +73,7 @@ export interface SpotifyCassetteConfig {
   subtitle: string;
   playlistId?: string;
   playlistName?: string;
+  playlistImageUrl?: string;
   coverColor: string;
   customCoverUrl?: string;
 }

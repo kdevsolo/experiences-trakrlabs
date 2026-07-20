@@ -209,6 +209,7 @@ export function ExperienceBuilder({
                 config={config as never}
                 onChange={(next) => setConfig(next as Record<string, unknown>)}
                 isAuthenticated={Boolean(user)}
+                returnPath={returnPath}
               />
             </motion.div>
           ) : (
