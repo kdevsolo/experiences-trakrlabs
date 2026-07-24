@@ -1,0 +1,2 @@
+export const SHARE_UNLOCK_PRICE_INR = 20;
+export const SHARE_UNLOCK_PRICE_LABEL = `₹${SHARE_UNLOCK_PRICE_INR}`;

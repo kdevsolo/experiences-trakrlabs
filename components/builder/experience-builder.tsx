@@ -39,17 +39,19 @@ export function ExperienceBuilder({
   user,
   initialDraft,
   initialExperience,
+  initialShareOpen = false,
 }: {
   experienceType: string;
   user: User | null;
   initialDraft?: Draft | null;
   initialExperience?: Experience | null;
+  initialShareOpen?: boolean;
 }) {
   const plugin = useMemo(() => getExperiencePluginOrThrow(experienceType), [experienceType]);
   const router = useRouter();
   const { showToast } = useToast();
   const [pending, startTransition] = useTransition();
-  const [panel, setPanel] = useState<StudioPanel>("edit");
+  const [panel, setPanel] = useState<StudioPanel>(initialShareOpen ? "preview" : "edit");
   const [title, setTitle] = useState(() => {
     if (initialExperience?.title) return initialExperience.title;
     if (initialDraft?.title) return initialDraft.title;
@@ -69,13 +71,32 @@ export function ExperienceBuilder({
   const [draftId, setDraftId] = useState<string | undefined>(initialDraft?.id);
   const [experience, setExperience] = useState<Experience | null>(initialExperience ?? null);
   const [authOpen, setAuthOpen] = useState(false);
-  const [shareOpen, setShareOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(initialShareOpen);
   const [menuOpen, setMenuOpen] = useState(false);
   const [fullscreenOpen, setFullscreenOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<"save" | "publish" | null>(null);
 
   const typeSlug = experienceType.replace(/_/g, "-");
-  const returnPath = `/create/${typeSlug}${draftId ? `/${draftId}` : ""}`;
+  const returnPath = `/create/${typeSlug}${draftId ? `/${draftId}` : ""}${
+    experience ? "?published=1" : ""
+  }`;
+
+  useEffect(() => {
+    if (!initialShareOpen) return;
+    showToast(
+      experience?.share_unlocked && experience?.share_slug
+        ? "Sharing unlocked — your link is ready"
+        : "Payment received — unlocking your link"
+    );
+    const url = new URL(window.location.href);
+    ["payment", "pid", "payment_id", "status", "email", "license_key", "unlocked"].forEach((key) => {
+      url.searchParams.delete(key);
+    });
+    url.searchParams.set("published", "1");
+    router.replace(`${url.pathname}?${url.searchParams.toString()}`);
+    // Only on first mount after checkout return.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (user) return;

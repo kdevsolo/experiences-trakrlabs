@@ -6,6 +6,7 @@ import { Copy, Lock } from "lucide-react";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Button } from "@/components/ui/button";
 import { createShareUnlockCheckout } from "@/lib/actions/payments";
+import { SHARE_UNLOCK_PRICE_LABEL } from "@/lib/payments/constants";
 import { trackShareCopy } from "@/components/experiences/shared/analytics-client";
 import { AuthSheet } from "@/components/auth/auth-sheet";
 
@@ -99,10 +100,10 @@ export function ShareSheet({
               <span>No public link yet</span>
             </div>
             <p className="text-caption">
-              Browser URLs from publish are private. Pay ₹10 to generate the official shareable link — only that link opens for others.
+              Browser URLs from publish are private. Pay {SHARE_UNLOCK_PRICE_LABEL} to generate the official shareable link — only that link opens for others.
             </p>
             <Button type="button" variant="accent" className="w-full" onClick={handleUnlock} disabled={pending}>
-              {pending ? "Processing..." : "Unlock sharing for ₹10"}
+              {pending ? "Processing..." : `Unlock sharing for ${SHARE_UNLOCK_PRICE_LABEL}`}
             </Button>
           </div>
         )}

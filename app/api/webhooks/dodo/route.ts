@@ -1,39 +1,55 @@
 import { NextResponse } from "next/server";
 import { completeShareUnlock } from "@/lib/actions/payments";
+import { getDodoBearerToken, getDodoClient, getDodoEnvironment, getDodoWebhookKey } from "@/lib/payments/dodo";
+import DodoPayments from "dodopayments";
+
+type DodoWebhookPayload = {
+  type?: string;
+  data?: {
+    metadata?: { payment_id?: string };
+    payment_id?: string;
+  };
+};
 
 export async function POST(request: Request) {
-  const secret = process.env.DODO_PAYMENTS_WEBHOOK_SECRET;
   const rawBody = await request.text();
+  const webhookKey = getDodoWebhookKey();
 
-  let payload: {
-    type?: string;
-    data?: {
-      metadata?: { payment_id?: string };
-      payment_id?: string;
-    };
-  };
+  let payload: DodoWebhookPayload;
 
-  try {
-    payload = JSON.parse(rawBody);
-  } catch {
-    return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
-  }
+  if (webhookKey) {
+    try {
+      const client =
+        getDodoClient() ??
+        new DodoPayments({
+          bearerToken: getDodoBearerToken() ?? "webhook-only",
+          environment: getDodoEnvironment(),
+          webhookKey,
+        });
 
-  const signature = request.headers.get("dodo-signature") ?? request.headers.get("x-dodo-signature");
-  if (secret && signature !== secret) {
-    return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+      payload = client.webhooks.unwrap(rawBody, {
+        headers: Object.fromEntries(request.headers.entries()),
+      }) as DodoWebhookPayload;
+    } catch (err) {
+      console.error("[webhooks/dodo] Signature verification failed:", err);
+      return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
+    }
+  } else {
+    try {
+      payload = JSON.parse(rawBody) as DodoWebhookPayload;
+    } catch {
+      return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
+    }
   }
 
   const paymentId = payload.data?.metadata?.payment_id;
   const providerPaymentId = payload.data?.payment_id;
 
-  if (
-    paymentId &&
-    (payload.type === "payment.succeeded" ||
-      payload.type === "checkout.session.completed" ||
-      payload.type === "payment.completed")
-  ) {
-    await completeShareUnlock(paymentId, providerPaymentId);
+  if (paymentId && payload.type === "payment.succeeded") {
+    const result = await completeShareUnlock(paymentId, providerPaymentId);
+    if (!result.success) {
+      console.error("[webhooks/dodo] completeShareUnlock failed:", result.error);
+    }
   }
 
   return NextResponse.json({ received: true });

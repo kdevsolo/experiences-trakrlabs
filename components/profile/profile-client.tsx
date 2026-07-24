@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { PageTransition } from "@/components/shell/page-transition";
+import { SHARE_UNLOCK_PRICE_LABEL } from "@/lib/payments/constants";
 import { MobileShell } from "@/components/shell/mobile-shell";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ListGroup, ListRow } from "@/components/ui/list-row";
@@ -85,7 +86,7 @@ export function ProfileClient({
             When you publish, your work stays private. Only you can preview it while signed in.
           </p>
           <p>
-            Pay ₹10 once to unlock a public link. Until payment, even if someone gets the URL, it will not open for them.
+            Pay {SHARE_UNLOCK_PRICE_LABEL} once to unlock a public link. Until payment, even if someone gets the URL, it will not open for them.
           </p>
           <Link
             href="/library"

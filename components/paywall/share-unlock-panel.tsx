@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { Copy, Lock, QrCode } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { createShareUnlockCheckout } from "@/lib/actions/payments";
+import { SHARE_UNLOCK_PRICE_LABEL } from "@/lib/payments/constants";
 import { signInWithGoogle } from "@/lib/actions/auth";
 import { trackShareCopy } from "@/components/experiences/shared/analytics-client";
 
@@ -99,10 +100,10 @@ export function ShareUnlockPanel({
       ) : (
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Publish URLs are private. Pay ₹10 to generate the official link that opens for anyone.
+            Publish URLs are private. Pay {SHARE_UNLOCK_PRICE_LABEL} to generate the official link that opens for anyone.
           </p>
           <Button type="button" className="w-full" onClick={handleUnlock} disabled={pending}>
-            {pending ? "Processing..." : "Unlock sharing for ₹20"}
+            {pending ? "Processing..." : `Unlock sharing for ${SHARE_UNLOCK_PRICE_LABEL}`}
           </Button>
         </div>
       )}
