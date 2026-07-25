@@ -106,7 +106,7 @@ export interface BirthdayPageConfig {
 export interface MemoryTimelineConfig {
   configVersion: number;
   title: string;
-  memories: Array<{ date: string; title: string; description: string }>;
+  memories: Array<{ date: string; endDate?: string; title: string; description: string }>;
   accentColor: string;
 }
 

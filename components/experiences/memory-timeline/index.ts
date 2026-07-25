@@ -10,7 +10,14 @@ export const memoryTimelinePlugin: ExperiencePlugin = {
   configSchema: z.object({
     configVersion: z.number(),
     title: z.string(),
-    memories: z.array(z.object({ date: z.string(), title: z.string(), description: z.string() })),
+    memories: z.array(
+      z.object({
+        date: z.string(),
+        endDate: z.string().optional(),
+        title: z.string(),
+        description: z.string(),
+      })
+    ),
     accentColor: z.string(),
   }),
   Editor: MemoryTimelineEditor,
