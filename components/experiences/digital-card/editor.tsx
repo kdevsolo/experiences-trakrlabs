@@ -1,12 +1,14 @@
 "use client";
 
 import { Input, Label, Textarea } from "@/components/ui/input";
+import { ImageUrlField } from "@/components/ui/image-url-field";
 import type { DigitalCardConfig } from "@/types/experience";
 import type { EditorProps } from "@/types/experience";
 
 export function DigitalCardEditor({
   config,
   onChange,
+  isAuthenticated,
 }: EditorProps<DigitalCardConfig>) {
   return (
     <div className="space-y-4">
@@ -37,15 +39,12 @@ export function DigitalCardEditor({
           placeholder="Write something heartfelt..."
         />
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="imageUrl">Image URL (optional)</Label>
-        <Input
-          id="imageUrl"
-          value={config.imageUrl ?? ""}
-          onChange={(e) => onChange({ ...config, imageUrl: e.target.value || undefined })}
-          placeholder="https://..."
-        />
-      </div>
+      <ImageUrlField
+        label="Cover photo (optional)"
+        value={config.imageUrl ?? ""}
+        onChange={(imageUrl) => onChange({ ...config, imageUrl: imageUrl || undefined })}
+        isAuthenticated={isAuthenticated}
+      />
       <div className="space-y-2">
         <Label htmlFor="accentColor">Accent color</Label>
         <Input

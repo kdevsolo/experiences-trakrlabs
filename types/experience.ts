@@ -95,12 +95,21 @@ export interface LoveLetterConfig {
   photoUrls: string[];
 }
 
+export type BirthdaySlide =
+  | { type: "image"; imageUrl: string; caption?: string }
+  | { type: "text"; heading?: string; body: string };
+
 export interface BirthdayPageConfig {
   configVersion: number;
   name: string;
   age: number;
   message: string;
   accentColor: string;
+  slides?: BirthdaySlide[];
+  spotifyTrackId?: string;
+  spotifyTrackName?: string;
+  spotifyTrackArtist?: string;
+  spotifyTrackImageUrl?: string;
 }
 
 export interface MemoryTimelineConfig {
